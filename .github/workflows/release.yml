@@ -3,7 +3,7 @@ name: Releases
 on:
   push:
     tags:
-    - '*'
+    - '**'
 
 jobs:
   release:
@@ -20,8 +20,7 @@ jobs:
       uses: actions/setup-java@v3
       with:
         distribution: 'temurin'
-        java-version: |
-          17
+        java-version: 17
     - name: Build
       run: |
         mvn package --batch-mode -Drevision=$RELEASE_VERSION
