@@ -7,27 +7,24 @@
 	<properties>
 		<revision>1.0.0</revision>
 
-		<dependency.bukkit.version>1.19.3-R0.1-SNAPSHOT</dependency.bukkit.version>
-
-		<maven.compiler.source>17</maven.compiler.source>
-		<maven.compiler.target>17</maven.compiler.target>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
 	<repositories>
 		<repository>
-			<id>nms-repo</id>
-			<url>https://repo.codemc.io/repository/nms/</url>
+			<id>spigot-repo</id>
+			<url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
 		</repository>
 	</repositories>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.spigotmc</groupId>
-			<artifactId>spigot</artifactId>
-			<version>${dependency.bukkit.version}</version>
-			<classifier>remapped-mojang</classifier>
+			<artifactId>spigot-api</artifactId>
+			<version>1.18-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
@@ -50,48 +47,6 @@
 						<goals>
 							<goal>shade</goal>
 						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<relocations>
-						<relocation>
-							<pattern>io.netty</pattern>
-							<shadedPattern>dev.imprex.shaded.netty</shadedPattern>
-						</relocation>
-					</relocations>
-					<shadedArtifactAttached>false</shadedArtifactAttached>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>net.md-5</groupId>
-				<artifactId>specialsource-maven-plugin</artifactId>
-				<version>1.2.3</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>remap</goal>
-						</goals>
-						<id>remap-obf</id>
-						<configuration>
-							<srgIn>org.spigotmc:minecraft-server:${dependency.bukkit.version}:txt:maps-mojang</srgIn>
-							<reverse>true</reverse>
-							<remappedDependencies>org.spigotmc:spigot:${dependency.bukkit.version}:jar:remapped-mojang</remappedDependencies>
-							<remappedArtifactAttached>true</remappedArtifactAttached>
-							<remappedClassifierName>remapped-obf</remappedClassifierName>
-						</configuration>
-					</execution>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>remap</goal>
-						</goals>
-						<id>remap-spigot</id>
-						<configuration>
-							<inputFile>${project.build.directory}/${project.artifactId}-${project.version}-remapped-obf.jar</inputFile>
-							<srgIn>org.spigotmc:minecraft-server:${dependency.bukkit.version}:csrg:maps-spigot</srgIn>
-							<remappedDependencies>org.spigotmc:spigot:${dependency.bukkit.version}:jar:remapped-obf</remappedDependencies>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
