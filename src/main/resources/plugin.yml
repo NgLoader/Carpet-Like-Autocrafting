@@ -1,0 +1,6 @@
+api-version: 1.19
+
+name: ${project.name}
+version: ${project.version}
+main: de.ngloader.autocrafting.AutoCraftingPlugin
+author: NgLoader
