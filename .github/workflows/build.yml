@@ -24,7 +24,7 @@ jobs:
     - name: Build
       run: |
         mvn clean package --batch-mode -Drevision=$BUILD_VERSION
-        mv target/carpetlikeautocrafting-*.jar ./
+        mv carpetlikeautocrafting-plugin/target/carpetlikeautocrafting-*.jar ./
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:
