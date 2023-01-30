@@ -3,31 +3,39 @@
 	<groupId>de.ngloader</groupId>
 	<artifactId>carpetlikeautocrafting</artifactId>
 	<version>${revision}</version>
+	<packaging>pom</packaging>
+
+	<name>CarpetLikeAutoCrafting</name>
+	<url>https://github.com/NgLoader/Carpet-Like-Autocrafting</url>
+	<description>Adding Autocrafting like carpet</description>
+	<inceptionYear>2022</inceptionYear>
+
+	<issueManagement>
+		<system>GitHub</system>
+		<url>https://github.com/NgLoader/Carpet-Like-Autocrafting/issues</url>
+	</issueManagement>
 
 	<properties>
-		<revision>1.0.0</revision>
+		<revision>1.0.0-indev</revision>
 
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<dependency.bukkit.version>1.8-R0.1-SNAPSHOT</dependency.bukkit.version>
 	</properties>
 
 	<repositories>
 		<repository>
 			<id>spigot-repo</id>
-			<url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+			<url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
+		</repository>
+		<repository>
+			<id>nms-repo</id>
+			<url>https://repo.codemc.io/repository/nms/</url>
 		</repository>
 	</repositories>
-
-	<dependencies>
-		<dependency>
-			<groupId>org.spigotmc</groupId>
-			<artifactId>spigot-api</artifactId>
-			<version>1.18-R0.1-SNAPSHOT</version>
-			<scope>provided</scope>
-		</dependency>
-	</dependencies>
 
 	<build>
 		<resources>
@@ -52,4 +60,10 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<modules>
+		<module>carpetlikeautocrafting-plugin</module>
+		<module>carpetlikeautocrafting-nms</module>
+		<module>carpetlikeautocrafting-common</module>
+	</modules>
 </project>

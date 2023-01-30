@@ -24,7 +24,7 @@ jobs:
     - name: Build
       run: |
         mvn package --batch-mode -Drevision=$RELEASE_VERSION
-        mv target/carpetlikeautocrafting-*.jar ./
+        mv carpetlikeautocrafting-plugin/target/carpetlikeautocrafting-*.jar ./
     - uses: ncipollo/release-action@v1
       with:
         artifacts: "carpetlikeautocrafting-*.jar"

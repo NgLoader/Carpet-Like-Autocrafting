@@ -3,20 +3,18 @@ package de.ngloader.autocrafting;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.data.Directional;
-import org.bukkit.block.data.type.Dispenser;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
-import org.bukkit.inventory.BlockInventoryHolder;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.Recipe;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
+
+import de.ngloader.autocrafting.nms.api.AutocraftingRecipe;
 
 public class AutoCraftingPlugin extends JavaPlugin implements Listener {
 
@@ -26,24 +24,15 @@ public class AutoCraftingPlugin extends JavaPlugin implements Listener {
 
 	@Override
 	public void onEnable() {
+		NMSInstance.initialize();
+
 		Bukkit.getPluginManager().registerEvents(this, this);
 	}
 
 	@EventHandler
 	public void onInventoryMove(InventoryMoveItemEvent event) {
 		Inventory destination = event.getDestination();
-		// Check if the event is called from a block
-		if (destination.getHolder() instanceof BlockInventoryHolder holder) {
-			Block block = holder.getBlock();
-			if (block == null || block.getType() != Material.DISPENSER) {
-				return;
-			}
-
-			Block facing = this.getBlockFacing(block);
-			if (facing == null || facing.getType() != Material.CRAFTING_TABLE) {
-				return;
-			}
-
+		if (NMSInstance.isAutocraftingDispenser(destination)) {
 			// Try to find a free inventory slot to place the item in.
 			ItemStack item = event.getItem();
 			for (int i = 0; i < 9; i++) {
@@ -67,7 +56,7 @@ public class AutoCraftingPlugin extends JavaPlugin implements Listener {
 	@EventHandler
 	public void onBlockDispense(BlockDispenseEvent event) {
 		Block block = event.getBlock();
-		if (this.isAutocraftingDispenser(block)) {
+		if (NMSInstance.isAutocraftingDispenser(block)) {
 			event.setCancelled(true);
 
 			/*
@@ -86,16 +75,16 @@ public class AutoCraftingPlugin extends JavaPlugin implements Listener {
 	 * @param target dispenser block
 	 */
 	public void tryAutoCraft(Block block) {
-		if (this.isAutocraftingDispenser(block)) {
+		if (NMSInstance.isAutocraftingDispenser(block)) {
 			org.bukkit.block.Dispenser dispenser = (org.bukkit.block.Dispenser) block.getState();
-			if (!dispenser.isPlaced()) {
-				return;
-			}
 
-			ItemStack craftedItem = this.autoCraftItem(dispenser);
+			CraftingResult craftedItem = this.autoCraftItem(dispenser);
 			if (craftedItem != null) {
-				Location facingBlock = this.getBlockFacing(block).getLocation().add(0.5, 0.2, 0.5);
-				dispenser.getWorld().dropItem(facingBlock, craftedItem);
+				Location facingBlock = NMSInstance.getBlockFacing(block).getLocation().add(0.5, 0.2, 0.5);
+
+				World world = dispenser.getWorld();
+				world.dropItem(facingBlock, craftedItem.resultItem);
+				craftedItem.remainingItems.forEach(remainingItem -> world.dropItem(facingBlock, remainingItem));
 			}
 		}
 	}
@@ -107,10 +96,10 @@ public class AutoCraftingPlugin extends JavaPlugin implements Listener {
 	 * @param target dispenser
 	 * @return crafted item when the recipe was found else null
 	 */
-	public ItemStack autoCraftItem(org.bukkit.block.Dispenser dispenser) {
+	public CraftingResult autoCraftItem(org.bukkit.block.Dispenser dispenser) {
 		Inventory inventory = dispenser.getInventory();
 
-		Recipe recipe = Bukkit.getCraftingRecipe(inventory.getContents(), dispenser.getWorld());
+		AutocraftingRecipe recipe = NMSInstance.getRecipe(inventory.getContents(), dispenser.getWorld());
 		if (recipe == null) {
 			return null;
 		}
@@ -129,47 +118,9 @@ public class AutoCraftingPlugin extends JavaPlugin implements Listener {
 			}
 		}
 
-		return recipe.getResult();
-	}
-
-	/**
-	 * Return the current face of a block.
-	 * Will return null when the block data is not implements {@link Directional}.
-	 * 
-	 * @param block dispenser
-	 * @return block face
-	 */
-	public BlockFace getBlockFace(Block block) {
-		if (block != null && block.getBlockData() instanceof Directional directional) {
-			return directional.getFacing();
-		}
-		return null;
-	}
-
-	/**
-	 * Return the facing block.
-	 * Will return null when the block data is not implements {@link Directional}.
-	 * 
-	 * @param block
-	 * @return faced block
-	 */
-	public Block getBlockFacing(Block block) {
-		BlockFace face = this.getBlockFace(block);
-		return face != null ? block.getRelative(face) : null;
-	}
-
-	/**
-	 * Return true if the current block type an dispenser and is facing towards a crafting table.
-	 * 
-	 * @param block dispenser
-	 * @return block is valid
-	 */
-	public boolean isAutocraftingDispenser(Block block) {
-		if (block != null
-				&& block.getBlockData() instanceof Dispenser dispenser) {
-			Block blockFacing = block.getRelative(dispenser.getFacing());
-			return blockFacing != null && blockFacing.getType() == Material.CRAFTING_TABLE;
-		}
-		return false;
+		CraftingResult result = new CraftingResult();
+		result.resultItem = recipe.getResultItem();
+		result.remainingItems = recipe.getRemainingItems(inventory);
+		return result;
 	}
 }
